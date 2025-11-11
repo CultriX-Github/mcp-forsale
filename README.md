@@ -36,29 +36,17 @@ It enables a domain holder to signal sale availability through DNS itself, witho
 
 ## 🧰 Tools Exposed
 
-Tool
+### 1. Tool: `check_for_sale`
+#### Description: Checks whether `_for-sale.<domain>` exists and returns basic results.
+#### Example: `{"domain": "example.nl", "method": "doh"}`
 
-Description
+### 2. Tool: `check_for_sale_structured`
+#### Description: Returns parsed structured fields (`furi`, `ftxt`, `fval`, `fcod`, etc.).
+#### Example: `{"domain": "example.nl"}`
 
-Example
-
-`check_for_sale`
-
-Checks whether `_for-sale.<domain>` exists and returns basic results.
-
-`{"domain": "example.nl", "method": "doh"}`
-
-`check_for_sale_structured`
-
-Returns parsed structured fields (`furi`, `ftxt`, `fval`, `fcod`, etc.).
-
-`{"domain": "example.nl"}`
-
-`natural_language_check`
-
-Accepts a free-text prompt and automatically detects the domain.
-
-`{"prompt": "Is example.nl for sale?"}`
+### 3. Tool: `natural_language_check`
+#### Description: Accepts a free-text prompt and automatically detects the domain.
+#### Example: `{"prompt": "Is example.nl for sale?"}`
 
 Each tool outputs JSON containing:
 
