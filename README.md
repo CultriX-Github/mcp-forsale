@@ -36,6 +36,18 @@ It enables a domain holder to signal sale availability through DNS itself, witho
 
 ## 🧰 Tools Exposed
 
+Each tool outputs JSON containing:
+
+-   `is_for_sale`: boolean
+    
+-   `records`: valid TXT strings beginning with `v=FORSALE1;`
+    
+-   `structured`: object of extracted tag values
+    
+-   `raw`: full DNS or resolver output
+    
+
+
 ### 1. Tool: `check_for_sale`
 #### Description: Checks whether `_for-sale.<domain>` exists and returns basic results.
 #### Example: `{"domain": "example.nl", "method": "doh"}`
@@ -47,17 +59,6 @@ It enables a domain holder to signal sale availability through DNS itself, witho
 ### 3. Tool: `natural_language_check`
 #### Description: Accepts a free-text prompt and automatically detects the domain.
 #### Example: `{"prompt": "Is example.nl for sale?"}`
-
-Each tool outputs JSON containing:
-
--   `is_for_sale`: boolean
-    
--   `records`: valid TXT strings beginning with `v=FORSALE1;`
-    
--   `structured`: object of extracted tag values
-    
--   `raw`: full DNS or resolver output
-    
 
 ## 🚀 Deployment
 
