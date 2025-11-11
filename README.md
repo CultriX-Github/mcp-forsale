@@ -1,55 +1,256 @@
-<<<<<<< HEAD
-# Building a Remote MCP Server on Cloudflare (Without Auth)
 
-This example allows you to deploy a remote MCP server that doesn't require authentication on Cloudflare Workers. 
+# 🏷️ For-Sale MCP Server (Cloudflare Worker)
 
-## Get started: 
+A lightweight **Model Context Protocol (MCP)** server that lets clients check whether a domain name advertises itself as **for sale** using the standardized [`_for-sale` DNS TXT record](https://datatracker.ietf.org/doc/html/draft-davids-forsalereg "null").
 
-[![Deploy to Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/ai/tree/main/demos/remote-mcp-authless)
+The server runs entirely on **Cloudflare Workers**, making it globally available, serverless, and free to operate at scale.
 
-This will deploy your MCP server to a URL like: `remote-mcp-server-authless.<your-account>.workers.dev/sse`
+## ✨ Features
 
-Alternatively, you can use the command line below to get the remote MCP Server created on your local machine:
-```bash
-npm create cloudflare@latest -- my-mcp-server --template=cloudflare/ai/demos/remote-mcp-authless
+-   **Implements the `_for-sale` draft specification** Parses `v=FORSALE1;` TXT records and extracts structured content fields (`furi`, `ftxt`, `fval`, `fcod`).
+    
+-   **Public MCP interface (SSE + Streamable HTTP)** Works with any MCP-compliant client such as Claude Desktop, Cursor, Windsurf, or the [MCP Inspector](https://github.com/modelcontextprotocol/inspector "null").
+    
+-   **Natural-language querying** Accepts human prompts like
+    
+    > “Is example.nl for sale?”
+    
+    > and automatically extracts and checks the domain.
+    
+-   **Dual resolver support** - Default: [Cloudflare DNS-over-HTTPS (DoH)](https://developers.cloudflare.com/1.1.1.1/dns-over-https/json-format/ "null")
+    
+    -   Optional: custom JSON resolver endpoint (`resolver.j78workers.workers.dev`).
+        
+-   **Runs serverlessly on Cloudflare Workers** — no backend needed.
+    
+
+## 🧠 Background
+
+This project implements the operational convention described in:
+
+> **Davids, M. (2025)** —
+> 
+> _The `_for-sale` Underscored and Globally Scoped DNS Node Name_ > [IETF Internet-Draft: draft-davids-forsalereg-11](https://datatracker.ietf.org/doc/html/draft-davids-forsalereg "null")
+
+It enables a domain holder to signal sale availability through DNS itself, without third-party marketplaces or WHOIS scraping.
+
+## 🧰 Tools Exposed
+
+Tool
+
+Description
+
+Example
+
+`check_for_sale`
+
+Checks whether `_for-sale.<domain>` exists and returns basic results.
+
+`{"domain": "example.nl", "method": "doh"}`
+
+`check_for_sale_structured`
+
+Returns parsed structured fields (`furi`, `ftxt`, `fval`, `fcod`, etc.).
+
+`{"domain": "example.nl"}`
+
+`natural_language_check`
+
+Accepts a free-text prompt and automatically detects the domain.
+
+`{"prompt": "Is example.nl for sale?"}`
+
+Each tool outputs JSON containing:
+
+-   `is_for_sale`: boolean
+    
+-   `records`: valid TXT strings beginning with `v=FORSALE1;`
+    
+-   `structured`: object of extracted tag values
+    
+-   `raw`: full DNS or resolver output
+    
+
+## 🚀 Deployment
+
+### 1. Clone and install
+
+```
+git clone [https://github.com/](https://github.com/)<yourname>/mcp-forsale-server.git
+cd mcp-forsale-server
+npm install
+
 ```
 
-## Customizing your MCP Server
+### 2. Develop locally
 
-To add your own [tools](https://developers.cloudflare.com/agents/model-context-protocol/tools/) to the MCP server, define each tool inside the `init()` method of `src/index.ts` using `this.server.tool(...)`. 
+```
+npm start
 
-## Connect to Cloudflare AI Playground
+```
 
-You can connect to your MCP server from the Cloudflare AI Playground, which is a remote MCP client:
+This runs the Worker at `http://127.0.0.1:8788`.
 
-1. Go to https://playground.ai.cloudflare.com/
-2. Enter your deployed MCP server URL (`remote-mcp-server-authless.<your-account>.workers.dev/sse`)
-3. You can now use your MCP tools directly from the playground!
+The MCP endpoints will be:
 
-## Connect Claude Desktop to your MCP server
+-   **SSE:** `http://127.0.0.1:8788/sse`
+    
+-   **HTTP:** `http://127.0.0.1:8788/mcp`
+    
 
-You can also connect to your remote MCP server from local MCP clients, by using the [mcp-remote proxy](https://www.npmjs.com/package/mcp-remote). 
+You can test locally using MCP Inspector:
 
-To connect to your MCP server from Claude Desktop, follow [Anthropic's Quickstart](https://modelcontextprotocol.io/quickstart/user) and within Claude Desktop go to Settings > Developer > Edit Config.
+```
+npx @modelcontextprotocol/inspector
+# → open http://localhost:5173, connect to [http://127.0.0.1:8788/sse](http://127.0.0.1:8788/sse)
 
-Update with this configuration:
+```
 
-```json
+### 3. Deploy to Cloudflare
+
+```
+npx wrangler deploy
+
+```
+
+Your public endpoints will be:
+
+-   **SSE:** `https://my-mcp-forsale.j78workers.workers.dev/sse`
+    
+-   **HTTP:** `https://my-mcp-forsale.j78workers.workers.dev/mcp`
+    
+
+### 🔍 Testing the Public Endpoint
+
+**Basic availability:**
+
+```
+curl -i [https://my-mcp-forsale.j78workers.workers.dev/sse](https://my-mcp-forsale.j78workers.workers.dev/sse)
+
+```
+
+**Interactive (recommended):**
+
+```
+npx @modelcontextprotocol/inspector
+# connect → [https://my-mcp-forsale.j78workers.workers.dev/sse](https://my-mcp-forsale.j78workers.workers.dev/sse)
+
+```
+
+**CLI (lightweight adapter):**
+
+```
+npx mcp-remote [https://my-mcp-forsale.j78workers.workers.dev/sse](https://my-mcp-forsale.j78workers.workers.dev/sse)
+
+```
+
+Inside the REPL:
+
+```
+/tools
+/call check_for_sale_structured {"domain":"example.nl"}
+
+```
+
+### ⚙️ Configuration
+
+Env variable
+
+Purpose
+
+Default
+
+`FORSALE_QUERY_METHOD`
+
+Preferred resolver: "doh" or "resolver"
+
+"doh"
+
+`CORS_ALLOWED_ORIGINS`
+
+Optional list of allowed origins for browser MCP clients
+
+`*`
+
+_(These can be added to `wrangler.toml` or Worker secrets if desired.)_
+
+### 🧩 Claude Desktop configuration (example)
+
+Create or edit `~/.config/Claude/claude_desktop_config.json` (macOS/Linux) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows), and add:
+
+```
 {
   "mcpServers": {
-    "calculator": {
+    "forSaleChecker": {
       "command": "npx",
-      "args": [
-        "mcp-remote",
-        "http://localhost:8787/sse"  // or remote-mcp-server-authless.your-account.workers.dev/sse
-      ]
+      "args": ["mcp-remote", "[https://my-mcp-forsale.j78workers.workers.dev/sse](https://my-mcp-forsale.j78workers.workers.dev/sse)"]
     }
   }
 }
+
 ```
 
-Restart Claude and you should see the tools become available. 
-=======
-# mcp-forsale
-MCP Server for the DNS forsale draft.
->>>>>>> 66f69ff81ab531c7647091de1e93d13b8b3d9dda
+Restart Claude Desktop. You’ll see a connector named `forSaleChecker` with tools: `check_for_sale`, `check_for_sale_structured`, and `natural_language_check`.
+
+If you later protect your Worker with a token or Cloudflare Access, add the appropriate headers in your proxy or switch to Claude’s native remote-MCP configuration UI where you can supply an `Authorization` header.
+
+### 🧪 Example Output
+
+```
+{
+  "domain": "example.nl",
+  "queried_name": "_for-sale.example.nl",
+  "method": "doh",
+  "is_for_sale": true,
+  "records": [
+    "v=FORSALE1;fcod=NLFS-NGYyYjEyZWYtZTUzYi00M2U0LTliNmYtNTcxZjBhMzA2NWQy",
+    "v=FORSALE1;ftxt=See the URL for important information!",
+    "v=FORSALE1;furi=[https://example.nl/for-sale.txt](https://example.nl/for-sale.txt)"
+  ],
+  "structured": {
+    "fcod": ["NLFS-NGYyYjEyZWYtZTUzYi00M2U0LTliNmYtNTcxZjBhMzA2NWQy"],
+    "ftxt": ["See the URL for important information!"],
+    "furi": ["[https://example.nl/for-sale.txt](https://example.nl/for-sale.txt)"]
+  }
+}
+
+```
+
+### 🛡️ Security / Privacy
+
+-   No user data is stored.
+    
+-   All DNS queries are public via DoH.
+    
+-   The Worker can optionally be fronted by Cloudflare Access or require an `Authorization: Bearer <token>` header for private usage.
+    
+
+### 🧩 Integration
+
+**Claude Desktop or other MCP clients**
+
+Add a **Custom Connector** → **URL**: `https://my-mcp-forsale.j78workers.workers.dev/sse`
+
+**Transport:** `SSE`
+
+(Optional) Add headers like `Authorization: Bearer <token>`
+
+Restart and invoke the tools directly from chat.
+
+### 🧑‍💻 Author
+
+**Jesse** — Nijmegen, Netherlands
+
+### 📄 License
+
+**MIT License © 2025 Jesse**
+
+This project builds on concepts described in the public IETF Internet-Draft `draft-davids-forsalereg-11`.
+
+### Example live instance
+
+`https://my-mcp-forsale.j78workers.workers.dev/sse`
+
+_Accessible from any compliant MCP client._
+
+Happy hacking — and may your domains sell swiftly! 🪩
