@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Building a Remote MCP Server on Cloudflare (Without Auth)
 
 This example allows you to deploy a remote MCP server that doesn't require authentication on Cloudflare Workers. 
@@ -48,3 +49,7 @@ Update with this configuration:
 ```
 
 Restart Claude and you should see the tools become available. 
+=======
+# mcp-forsale
+MCP Server for the DNS forsale draft.
+>>>>>>> 66f69ff81ab531c7647091de1e93d13b8b3d9dda
