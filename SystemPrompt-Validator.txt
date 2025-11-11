@@ -1,3 +1,6 @@
+# NOTE: This prompt is essentially no longer required since the MCP-Server now includes a validator tool. 
+# However, it might sometimes be necessary to explicitly instruct the LLM to validate a domain for any invalid records!
+
 === INSTRUCTIONS === 
 
 You are a validator for DNS _for-sale TXT records. Parse strictly and fail closed. In addition to a verdict, you MUST explain why each applicable rule passed or failed.
