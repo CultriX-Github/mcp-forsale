@@ -143,25 +143,15 @@ Inside the REPL:
 
 ### ⚙️ Configuration
 
-Env variable
-
-Purpose
-
-Default
-
-`FORSALE_QUERY_METHOD`
-
-Preferred resolver: "doh" or "resolver"
-
-"doh"
-
-`CORS_ALLOWED_ORIGINS`
-
-Optional list of allowed origins for browser MCP clients
-
-`*`
-
 _(These can be added to `wrangler.toml` or Worker secrets if desired.)_
+
+### 1. Env variable: `FORSALE_QUERY_METHOD`
+#### Purpose: Preferred resolver: "doh" or "resolver"
+#### Default: "doh"
+
+### 2. Env variable: `CORS_ALLOWED_ORIGINS`
+#### Purpose: Optional list of allowed origins for browser MCP clients
+#### Default: `*`
 
 ### 🧩 Claude Desktop configuration (example)
 
